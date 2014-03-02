@@ -1,12 +1,12 @@
 /*
  * Copyright 2010, 2011 nxtbgthng for SoundCloud Ltd.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -15,7 +15,7 @@
  *
  * For more information and documentation refer to
  * http://soundcloud.com/api
- * 
+ *
  */
 
 #import "SCBundle.h"
@@ -36,10 +36,23 @@
         self.layer.shadowColor = [UIColor blackColor].CGColor;
         self.layer.shadowOpacity = 0.55;
         self.layer.shadowOffset = CGSizeMake(0, 0);
-
+		
+		// System version dependent values.
+		CGFloat cloudImageY = 0.0;
+		CGFloat cancelButtonY = 0.0;
+		if (floor(NSFoundationVersionNumber) <= NSFoundationVersionNumber_iOS_6_1) {
+			// iOS 6.1 or earlier
+			cloudImageY = -0.6;
+			cancelButtonY = 6.0;
+		} else {
+			// iOS 7 or later
+			cloudImageY = 19.4;
+			cancelButtonY = 26.0;
+		}
+		
         // Cancel Button
         SCGradientButton *cancelButton = [[SCGradientButton alloc] initWithFrame:CGRectMake(CGRectGetWidth(self.bounds) - 80.0,
-                                                                                            6.0,
+                                                                                            cancelButtonY,
                                                                                             72.0,
                                                                                             32.0)
                                                                           colors:nil];
@@ -66,13 +79,13 @@
         cloudImageView.autoresizingMask = (UIViewAutoresizingFlexibleRightMargin);
         cloudImageView.image = [SCBundle imageWithName:@"orange_header_logo"];
         [cloudImageView sizeToFit];
-        cloudImageView.frame = CGRectMake(0,
-                                          -0.6,
+		cloudImageView.frame = CGRectMake(0,
+                                          cloudImageY,
                                           CGRectGetWidth(cloudImageView.frame),
                                           CGRectGetHeight(cloudImageView.frame));
         [self addSubview:cloudImageView];
         [cloudImageView release];
-
+		
     }
     return self;
 }

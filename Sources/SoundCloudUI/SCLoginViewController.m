@@ -1,12 +1,12 @@
 /*
  * Copyright 2010, 2011 nxtbgthng for SoundCloud Ltd.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -15,7 +15,7 @@
  *
  * For more information and documentation refer to
  * http://soundcloud.com/api
- * 
+ *
  */
 
 #import "UIViewController+SoundCloudUI.h"
@@ -65,7 +65,7 @@
     
     SCLoginViewController *loginViewController = [[[self alloc] initWithPreparedURL:anURL completionHandler:aCompletionHandler] autorelease];
     UINavigationController *navigationController = [[UINavigationController alloc] initWithRootViewController:loginViewController];
-    [navigationController setModalPresentationStyle:UIModalPresentationFormSheet];
+	[navigationController setModalPresentationStyle:UIModalPresentationFormSheet];
     
     return [navigationController autorelease];
 }
@@ -92,12 +92,12 @@
                                                  selector:@selector(failToRequestAccess:)
                                                      name:SCSoundCloudDidFailToRequestAccessNotification
                                                    object:nil];
-
+		
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(updateScrollView)
                                                      name:UIKeyboardDidShowNotification
                                                    object:nil];
-
+		
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(updateScrollView)
                                                      name:UIKeyboardDidHideNotification
@@ -113,7 +113,6 @@
     [completionHandler release];
     [super dealloc];
 }
-
 
 #pragma mark UIViewController
 
@@ -134,11 +133,18 @@
 - (void)viewWillAppear:(BOOL)animated;
 {
     [super viewWillAppear:animated];
-    SCConnectToSoundCloudTitleView *scTitleView = [[[SCConnectToSoundCloudTitleView alloc] initWithFrame:CGRectMake(0,
-                                                                                                                    0,
-                                                                                                                    CGRectGetWidth(self.view.bounds),
-                                                                                                                    44.0)] autorelease];
-
+	
+	CGFloat titleBarHeight = 0.0;
+	if (floor(NSFoundationVersionNumber) <= NSFoundationVersionNumber_iOS_6_1) {
+		// iOS 6.1 or earlier
+		titleBarHeight = 44.0;
+	} else {
+		// iOS 7 or later
+		titleBarHeight = 64.0;
+	}
+	CGRect frame = CGRectMake(0, 0, CGRectGetWidth(self.view.bounds), titleBarHeight);
+    SCConnectToSoundCloudTitleView *scTitleView = [[[SCConnectToSoundCloudTitleView alloc] initWithFrame:frame] autorelease];
+	
     [self.view addSubview:scTitleView];
     self.loginView.frame = CGRectMake(0,
                                       scTitleView.frame.size.height,
@@ -151,8 +157,14 @@
     if ([UIDevice isIPad]) {
         return YES;
     }
-
+	
     return UIInterfaceOrientationIsPortrait(toInterfaceOrientation);
+}
+
+- (UIStatusBarStyle)preferredStatusBarStyle {
+	// This is a delegate method that is only called on iOS 7 or newer.
+	// Because the status bar will cover the gray title view os SoundCloud, request a bright status bar.
+    return UIStatusBarStyleLightContent;
 }
 
 #pragma mark Notifications
@@ -180,7 +192,7 @@
                                           otherButtonTitles:nil];
     [alert show];
     [alert release];
-
+	
     //[[self modalPresentingViewController] dismissModalViewControllerAnimated:YES];
 }
 
@@ -200,7 +212,7 @@
         } else {
             position = self.view.bounds.origin;
         }
-
+		
         [self.loginView setContentOffset:CGPointMake(position.x,
                                                      position.y)
                                 animated:YES];
@@ -210,7 +222,7 @@
 #pragma mark Private
 
 - (void)cancel;
-{   
+{
     if (self.completionHandler) {
         NSDictionary *userInfo = [NSDictionary dictionaryWithObject:@"Canceled by user." forKey:NSLocalizedDescriptionKey];
         self.completionHandler([NSError errorWithDomain:SCUIErrorDomain code:SCUICanceledErrorCode userInfo:userInfo]);
